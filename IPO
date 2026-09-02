@@ -1,0 +1,122 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+typedef struct {
+    int capital;
+    int profit;
+} Project;
+
+
+int compareProjects(const void *a, const void *b) {
+    Project *p1 = (Project *)a;
+    Project *p2 = (Project *)b;
+    if (p1->capital < p2->capital) return -1;
+    if (p1->capital > p2->capital) return 1;
+    return 0;
+}
+
+
+typedef struct {
+    int *data;
+    int size;
+    int capacity;
+} MaxHeap;
+
+MaxHeap* createMaxHeap(int capacity) {
+    MaxHeap *heap = (MaxHeap *)malloc(sizeof(MaxHeap));
+    heap->data = (int *)malloc(sizeof(int) * capacity);
+    heap->size = 0;
+    heap->capacity = capacity;
+    return heap;
+}
+
+void swap(int *a, int *b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void pushHeap(MaxHeap *heap, int val) {
+    heap->data[heap->size] = val;
+    int curr = heap->size;
+    heap->size++;
+    
+
+    while (curr > 0) {
+        int parent = (curr - 1) / 2;
+        if (heap->data[curr] > heap->data[parent]) {
+            swap(&heap->data[curr], &heap->data[parent]);
+            curr = parent;
+        } else {
+            break;
+        }
+    }
+}
+
+int popHeap(MaxHeap *heap) {
+    if (heap->size == 0) return -1;
+    int top = heap->data[0];
+    heap->size--;
+    heap->data[0] = heap->data[heap->size];
+    
+    int curr = 0;
+ 
+    while (curr * 2 + 1 < heap->size) {
+        int left = curr * 2 + 1;
+        int right = curr * 2 + 2;
+        int largest = left;
+        
+        if (right < heap->size && heap->data[right] > heap->data[left]) {
+            largest = right;
+        }
+        
+        if (heap->data[curr] < heap->data[largest]) {
+            swap(&heap->data[curr], &heap->data[largest]);
+            curr = largest;
+        } else {
+            break;
+        }
+    }
+    return top;
+}
+
+int findMaximizedCapital(int k, int w, int* profits, int profitsSize, int* capital, int capitalSize) {
+    int n = profitsSize;
+    Project *projects = (Project *)malloc(sizeof(Project) * n);
+    
+    for (int i = 0; i < n; i++) {
+        projects[i].capital = capital[i];
+        projects[i].profit = profits[i];
+    }
+    
+  
+    qsort(projects, n, sizeof(Project), compareProjects);
+    
+
+    MaxHeap *heap = createMaxHeap(n);
+    int projectIdx = 0;
+    
+
+    for (int i = 0; i < k; i++) {
+
+        while (projectIdx < n && projects[projectIdx].capital <= w) {
+            pushHeap(heap, projects[projectIdx].profit);
+            projectIdx++;
+        }
+        
+    
+        if (heap->size == 0) {
+            break;
+        }
+        
+        w += popHeap(heap);
+    }
+    
+ 
+    free(projects);
+    free(heap->data);
+    free(heap);
+    
+    return w;
+}
