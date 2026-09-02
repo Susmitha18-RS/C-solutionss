@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+
+
+bool isSubsequence(const char* word, const char* s) {
+    int i = 0, j = 0;
+    while (word[i] != '\0' && s[j] != '\0') {
+        if (word[i] == s[j]) {
+            i++;
+        }
+        j++;
+    }
+    return word[i] == '\0';
+}
+
+char* findLongestWord(char* s, char** dictionary, int dictionarySize) {
+    char* bestWord = "";
+    int bestLen = 0;
+    
+    for (int i = 0; i < dictionarySize; i++) {
+        char* word = dictionary[i];
+        int len = strlen(word);
+        
+        
+        if (len < bestLen) {
+            continue;
+        }
+        if (len == bestLen && strcmp(word, bestWord) >= 0) {
+            continue;
+        }
+        
+        
+        if (isSubsequence(word, s)) {
+            bestWord = word;
+            bestLen = len;
+        }
+    }
+    
+    return bestWord;
+}
