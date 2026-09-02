@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+    int score;
+    int index;
+} Athlete;
+
+
+int compare(const void *a, const void *b) {
+    Athlete *athleteA = (Athlete *)a;
+    Athlete *athleteB = (Athlete *)b;
+    return athleteB->score - athleteA->score;
+}
+
+char** findRelativeRanks(int* score, int scoreSize, int* returnSize) {
+    *returnSize = scoreSize;
+    
+   
+    char **result = (char **)malloc(sizeof(char *) * scoreSize);
+    
+   
+    Athlete *athletes = (Athlete *)malloc(sizeof(Athlete) * scoreSize);
+    for (int i = 0; i < scoreSize; i++) {
+        athletes[i].score = score[i];
+        athletes[i].index = i;
+    }
+    
+    
+    qsort(athletes, scoreSize, sizeof(Athlete), compare);
+    
+    
+    for (int i = 0; i < scoreSize; i++) {
+        int origIndex = athletes[i].index;
+        
+        
+        result[origIndex] = (char *)malloc(sizeof(char) * 15);
+        
+        if (i == 0) {
+            strcpy(result[origIndex], "Gold Medal");
+        } else if (i == 1) {
+            strcpy(result[origIndex], "Silver Medal");
+        } else if (i == 2) {
+            strcpy(result[origIndex], "Bronze Medal");
+        } else {
+            // Convert rank (1-indexed) to string format
+            sprintf(result[origIndex], "%d", i + 1);
+        }
+    }
+    
+    
+    free(athletes);
+    
+    return result;
+}
