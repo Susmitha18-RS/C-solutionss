@@ -1,0 +1,47 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+int compare(const void *a, const void *b) {
+    return (*(const int *)a - *(const int *)b);
+}
+
+int findMinDifference(char** timePoints, int timePointsSize) {
+  
+    if (timePointsSize > 1440) {
+        return 0;
+    }
+ 
+    int *minutesArray = (int *)malloc(sizeof(int) * timePointsSize);
+    
+    
+    for (int i = 0; i < timePointsSize; i++) {
+        int hours = (timePoints[i][0] - '0') * 10 + (timePoints[i][1] - '0');
+        int mins = (timePoints[i][3] - '0') * 10 + (timePoints[i][4] - '0');
+        minutesArray[i] = hours * 60 + mins;
+    }
+    
+    
+    qsort(minutesArray, timePointsSize, sizeof(int), compare);
+    
+    
+    int minDiff = 1440; // Maximum possible difference is 1440 / 2 = 720, so 1440 is a safe upper bound
+    for (int i = 1; i < timePointsSize; i++) {
+        int diff = minutesArray[i] - minutesArray[i - 1];
+        if (diff < minDiff) {
+            minDiff = diff;
+        }
+    }
+    
+    
+    int wrapAroundDiff = (1440 - minutesArray[timePointsSize - 1]) + minutesArray[0];
+    if (wrapAroundDiff < minDiff) {
+        minDiff = wrapAroundDiff;
+    }
+    
+    
+    free(minutesArray);
+    
+    return minDiff;
+}
