@@ -1,0 +1,94 @@
+#include <stdlib.h>
+#include <string.h>
+
+int compareStrings(const void* a, const void* b) {
+    return strcmp(*(const char**)a, *(const char**)b);
+}
+'
+int binarySearch(char** unique_words, int num_unique, const char* str, int len) {
+    int low = 0, high = num_unique - 1;
+    while (low <= high) {
+        int mid = low + (high - low) / 2;
+        int cmp = strncmp(str, unique_words[mid], len);
+        if (cmp == 0) {
+            return mid;
+        }
+        if (cmp < 0) {
+            high = mid - 1;
+        } else {
+            low = mid + 1;
+        }
+    }
+    return -1;
+}
+
+int* findSubstring(char* s, char** words, int wordsSize, int* returnSize) {
+    *returnSize = 0;
+    if (!s || wordsSize == 0) return NULL;
+
+    int s_len = strlen(s);
+    int word_len = strlen(words[0]);
+    int total_len = word_len * wordsSize;
+
+    if (s_len < total_len) return NULL;
+
+    qsort(words, wordsSize, sizeof(char*), compareStrings);
+
+    char** unique_words = (char**)malloc(wordsSize * sizeof(char*));
+    int* expected_counts = (int*)calloc(wordsSize, sizeof(int));
+    int num_unique = 0;
+
+    for (int i = 0; i < wordsSize; i++) {
+        if (num_unique == 0 || strcmp(words[i], unique_words[num_unique - 1]) != 0) {
+            unique_words[num_unique] = words[i];
+            expected_counts[num_unique] = 1;
+            num_unique++;
+        } else {
+            expected_counts[num_unique - 1]++;
+        }
+    }
+
+    int* result = (int*)malloc(s_len * sizeof(int));
+    int* curr_counts = (int*)malloc(num_unique * sizeof(int));
+
+
+    for (int i = 0; i < word_len; i++) {
+        int left = i;
+        int right = i;
+        int count = 0;
+        memset(curr_counts, 0, num_unique * sizeof(int));
+
+        while (right + word_len <= s_len) {
+           
+            int id = binarySearch(unique_words, num_unique, &s[right], word_len);
+            right += word_len;
+
+            if (id != -1) {
+                curr_counts[id]++;
+                count++;
+
+                while (curr_counts[id] > expected_counts[id]) {
+                    int left_id = binarySearch(unique_words, num_unique, &s[left], word_len);
+                    curr_counts[left_id]--;
+                    count--;
+                    left += word_len;
+                }
+
+                if (count == wordsSize) {
+                    result[(*returnSize)++] = left;
+                }
+            } else {
+          
+                memset(curr_counts, 0, num_unique * sizeof(int));
+                count = 0;
+                left = right;
+            }
+        }
+    }
+
+    free(unique_words);
+    free(expected_counts);
+    free(curr_counts);
+
+    return result;
+}
