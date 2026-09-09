@@ -1,0 +1,80 @@
+#include <stdbool.h>
+
+int rows[9];
+int cols[9];
+int boxes[9];
+
+
+int getBoxIndex(int r, int c) {
+    return (r / 3) * 3 + (c / 3);
+}
+
+
+bool solve(char** board, int r, int c) {
+ 
+    if (c == 9) {
+        r++;
+        c = 0;
+    }
+
+    if (r == 9) {
+        return true;
+    }
+
+  
+    if (board[r][c] != '.') {
+        return solve(board, r, c + 1);
+    }
+
+    int box_idx = getBoxIndex(r, c);
+
+    for (int num = 1; num <= 9; num++) {
+        int mask = 1 << num;
+
+        if (!(rows[r] & mask) && !(cols[c] & mask) && !(boxes[box_idx] & mask)) {
+     
+            board[r][c] = num + '0';
+            rows[r] |= mask;
+            cols[c] |= mask;
+            boxes[box_idx] |= mask;
+
+     
+            if (solve(board, r, c + 1)) {
+                return true;
+            }
+
+       
+            board[r][c] = '.';
+            rows[r] &= ~mask;
+            cols[c] &= ~mask;
+            boxes[box_idx] &= ~mask;
+        }
+    }
+
+    return false; 
+}
+
+void solveSudoku(char** board, int boardSize, int* boardColSize) {
+    
+    for (int i = 0; i < 9; i++) {
+        rows[i] = 0;
+        cols[i] = 0;
+        boxes[i] = 0;
+    }
+
+
+    for (int r = 0; r < 9; r++) {
+        for (int c = 0; c < 9; c++) {
+            if (board[r][c] != '.') {
+                int num = board[r][c] - '0';
+                int mask = 1 << num;
+                rows[r] |= mask;
+                cols[c] |= mask;
+                boxes[getBoxIndex(r, c)] |= mask;
+            }
+        }
+    }
+
+
+    solve(board, 0, 0);
+}
