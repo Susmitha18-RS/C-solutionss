@@ -1,0 +1,150 @@
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+bool isAdjacent(const char* a, const char* b, int len) {
+    int diff = 0;
+    for (int i = 0; i < len; i++) {
+        if (a[i] != b[i]) {
+            diff++;
+            if (diff > 1) return false;
+        }
+    }
+    return diff == 1;
+}
+
+
+void findPaths(int currIdx, int startIdx, int targetSteps, int currentStep, 
+               int* path, int** adj, int* adjSizes, int* wordLevels,
+               char** wordList, char*** results, int* returnSize, int** returnColumnSizes) {
+    
+    path[currentStep] = currIdx;
+
+    if (currIdx == startIdx) {
+  .
+        results[*returnSize] = (char**)malloc((currentStep + 1) * sizeof(char*));
+        (*returnColumnSizes)[*returnSize] = currentStep + 1;
+        
+ 
+        for (int i = 0; i <= currentStep; i++) {
+            results[*returnSize][i] = strdup(wordList[path[currentStep - i]]);
+        }
+        (*returnSize)++;
+        return;
+    }
+
+    for (int i = 0; i < adjSizes[currIdx]; i++) {
+        int neighbor = adj[currIdx][i];
+        if (wordLevels[neighbor] == wordLevels[currIdx] - 1) {
+            findPaths(neighbor, startIdx, targetSteps, currentStep + 1, 
+                      path, adj, adjSizes, wordLevels, wordList, 
+                      results, returnSize, returnColumnSizes);
+        }
+    }
+}
+
+
+char*** findLadders(char* beginWord, char* endWord, char** wordList, int wordListSize, int* returnSize, int** returnColumnSizes) {
+    *returnSize = 0;
+    int wordLen = strlen(beginWord);
+
+    int endIdx = -1;
+    for (int i = 0; i < wordListSize; i++) {
+        if (strcmp(wordList[i], endWord) == 0) {
+            endIdx = i;
+            break;
+        }
+    }
+
+    if (endIdx == -1) return NULL;
+
+    int startIdx = -1;
+    for (int i = 0; i < wordListSize; i++) {
+        if (strcmp(wordList[i], beginWord) == 0) {
+            startIdx = i;
+            break;
+        }
+    }
+
+    int totalWords = wordListSize;
+    char** localWordList = (char**)malloc((wordListSize + 1) * sizeof(char*));
+    for (int i = 0; i < wordListSize; i++) localWordList[i] = wordList[i];
+
+    if (startIdx == -1) {
+        localWordList[totalWords] = beginWord;
+        startIdx = totalWords;
+        totalWords++;
+    }
+
+
+    int** adj = (int**)malloc(totalWords * sizeof(int*));
+    int* adjSizes = (int*)calloc(totalWords, sizeof(int));
+    for (int i = 0; i < totalWords; i++) {
+        adj[i] = (int*)malloc(totalWords * sizeof(int));
+    }
+
+
+    for (int i = 0; i < totalWords; i++) {
+        for (int j = i + 1; j < totalWords; j++) {
+            if (isAdjacent(localWordList[i], localWordList[j], wordLen)) {
+                adj[i][adjSizes[i]++] = j;
+                adj[j][adjSizes[j]++] = i;
+            }
+        }
+    }
+
+    // BFS tracking arrays
+    int* wordLevels = (int*)malloc(totalWords * sizeof(int));
+    for (int i = 0; i < totalWords; i++) wordLevels[i] = 1000000; // Large value representing infinity
+    
+    int* queue = (int*)malloc(totalWords * sizeof(int));
+    int head = 0, tail = 0;
+
+    // Setup initial state
+    queue[tail++] = startIdx;
+    wordLevels[startIdx] = 0;
+    bool found = false;
+
+    // Run standard BFS layer collection
+    while (head < tail) {
+        int curr = queue[head++];
+        
+        if (curr == endIdx) {
+            found = true;
+        }
+
+        for (int i = 0; i < adjSizes[curr]; i++) {
+            int neighbor = adj[curr][i];
+            if (wordLevels[neighbor] > wordLevels[curr] + 1) {
+                wordLevels[neighbor] = wordLevels[curr] + 1;
+                queue[tail++] = neighbor;
+            }
+        }
+    }
+
+    char*** results = NULL;
+    if (found) {
+        // Allocate space for paths; constrained maximum sum of paths is 10^5
+        results = (char***)malloc(100000 * sizeof(char**));
+        *returnColumnSizes = (int*)malloc(100000 * sizeof(int));
+        
+        int* pathBuffer = (int*)malloc(totalWords * sizeof(int));
+        
+        // Backward-trace the shortest path from endIdx to startIdx via DFS
+        findPaths(endIdx, startIdx, wordLevels[endIdx] + 1, 0, 
+                  pathBuffer, adj, adjSizes, wordLevels, 
+                  localWordList, results, returnSize, returnColumnSizes);
+        
+        free(pathBuffer);
+    }
+
+    // Cleanup allocated operational matrix memory
+    for (int i = 0; i < totalWords; i++) free(adj[i]);
+    free(adj);
+    free(adjSizes);
+    free(wordLevels);
+    free(queue);
+    free(localWordList);
+
+    return results;
+}
