@@ -1,0 +1,47 @@
+#include <stdlib.h>
+
+struct Node* visited[101];
+
+struct Node* cloneHelper(struct Node* node) {
+    if (node == NULL) {
+        return NULL;
+    }
+
+
+    if (visited[node->val] != NULL) {
+        return visited[node->val];
+    }
+
+
+    struct Node* cloneNode = (struct Node*)malloc(sizeof(struct Node));
+    cloneNode->val = node->val;
+    cloneNode->numNeighbors = node->numNeighbors;
+    
+
+    visited[node->val] = cloneNode;
+
+
+    if (node->numNeighbors > 0) {
+        cloneNode->neighbors = (struct Node**)malloc(node->numNeighbors * sizeof(struct Node*));
+        
+
+        for (int i = 0; i < node->numNeighbors; i++) {
+            cloneNode->neighbors[i] = cloneHelper(node->neighbors[i]);
+        }
+    } else {
+        cloneNode->neighbors = NULL;
+    }
+
+    return cloneNode;
+}
+
+struct Node *cloneGraph(struct Node *node) {
+    if (node == NULL) return NULL;
+
+
+    for (int i = 0; i <= 100; i++) {
+        visited[i] = NULL;
+    }
+
+    return cloneHelper(node);
+}
