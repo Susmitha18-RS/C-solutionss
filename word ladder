@@ -1,0 +1,75 @@
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+
+typedef struct {
+    int wordIdx; // Index in localWordList (-1 for beginWord)
+    int level;   // Current length of transformation sequence
+} QueueNode;
+
+
+bool isOneLetterDiff(const char* a, const char* b, int len) {
+    int diff = 0;
+    for (int i = 0; i < len; i++) {
+        if (a[i] != b[i]) {
+            diff++;
+            if (diff > 1) return false;
+        }
+    }
+    return diff == 1;
+}
+
+int ladderLength(char* beginWord, char* endWord, char** wordList, int wordListSize) {
+    int wordLen = strlen(beginWord);
+    
+
+    int endIdx = -1;
+    for (int i = 0; i < wordListSize; i++) {
+        if (strcmp(wordList[i], endWord) == 0) {
+            endIdx = i;
+            break;
+        }
+    }
+
+    if (endIdx == -1) return 0;
+
+
+    bool* visited = (bool*)calloc(wordListSize, sizeof(bool));
+
+
+    QueueNode* queue = (QueueNode*)malloc((wordListSize + 1) * sizeof(QueueNode));
+    int head = 0;
+    int tail = 0;
+
+
+    queue[tail].wordIdx = -1;
+    queue[tail].level = 1; 
+    tail++;
+
+    while (head < tail) {
+        QueueNode curr = queue[head++];
+        
+       char* currWord = (curr.wordIdx == -1) ? beginWord : wordList[curr.wordIdx];
+
+        if (curr.wordIdx == endIdx) {
+            free(visited);
+            free(queue);
+            return curr.level;
+        }
+
+        for (int i = 0; i < wordListSize; i++) {
+            if (!visited[i] && isOneLetterDiff(currWord, wordList[i], wordLen)) {
+                visited[i] = true; // Mark as visited immediately to avoid duplicates
+                queue[tail].wordIdx = i;
+                queue[tail].level = curr.level + 1;
+                tail++;
+            }
+        }
+    }
+
+
+    free(visited);
+    free(queue);
+    return 0;
+}
