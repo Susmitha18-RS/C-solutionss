@@ -1,0 +1,100 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+#define HASH_SIZE 20011 
+
+
+long long hash_keys[HASH_SIZE];
+int hash_indices[HASH_SIZE];
+
+void init_hash() {
+    memset(hash_keys, -1, sizeof(hash_keys));
+}
+
+int find_hash(long long rem) {
+    int idx = rem % HASH_SIZE;
+    while (hash_keys[idx] != -1) {
+        if (hash_keys[idx] == rem) {
+            return hash_indices[idx];
+        }
+        idx = (idx + 1) % HASH_SIZE;
+    }
+    return -1;
+}
+
+void insert_hash(long long rem, int str_idx) {
+    int idx = rem % HASH_SIZE;
+    while (hash_keys[idx] != -1) {
+        if (hash_keys[idx] == rem) {
+            hash_indices[idx] = str_idx;
+            return;
+        }
+        idx = (idx + 1) % HASH_SIZE;
+    }
+    hash_keys[idx] = rem;
+    hash_indices[idx] = str_idx;
+}
+
+char* fractionToDecimal(int numerator, int denominator) {
+    if (numerator == 0) {
+        char* zero = (char*)malloc(2 * sizeof(char));
+        strcpy(zero, "0");
+        return zero;
+    }
+
+
+    char* res = (char*)malloc(10015 * sizeof(char));
+    int len = 0;
+
+
+    if ((numerator < 0) ^ (denominator < 0)) {
+        res[len++] = '-';
+    }
+
+    long long num = llabs((long long)numerator);
+    long long den = llabs((long long)denominator);
+
+
+    long long quotient = num / den;
+    len += sprintf(res + len, "%lld", quotient);
+
+    long long rem = num % den;
+    if (rem == 0) {
+        return res; // Completely divisible
+    }
+
+
+    res[len++] = '.';
+    res[len] = '\0';
+
+
+    init_hash();
+
+
+    while (rem != 0) {
+        int pos = find_hash(rem);
+        if (pos != -1) {
+      
+            int cur_len = len;
+            for (int i = cur_len; i >= pos; i--) {
+                res[i + 1] = res[i];
+            }
+            res[pos] = '(';
+            len++;
+            res[len++] = ')';
+            res[len] = '\0';
+            break;
+        }
+
+        insert_hash(rem, len);
+
+        rem *= 10;
+        res[len++] = (rem / den) + '0';
+        res[len] = '\0';
+        rem %= den;
+    }
+
+    return res;
+}
