@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+typedef struct {
+    char** sentences;
+    int count;
+} MemoNode;
+
+void backtrack(char* s, int start, int len, char** wordDict, int wordDictSize, 
+               char* currentPath, int pathLen, char*** result, int* returnSize, MemoNode* memo) {
+    
+    if (start == len) {
+
+        char* validSentence = (char*)malloc((pathLen) * sizeof(char));
+        strncpy(validSentence, currentPath, pathLen - 1);
+        validSentence[pathLen - 1] = '\0';
+        
+        (*result) = (char**)realloc((*result), ((*returnSize) + 1) * sizeof(char*));
+        (*result)[*returnSize] = validSentence;
+        (*returnSize)++;
+        return;
+    }
+
+    if (memo[start].count == -1) return;
+
+    int oldReturnSize = *returnSize;
+
+    for (int end = start + 1; end <= len; end++) {
+        int wordLen = end - start;
+        
+        for (int i = 0; i < wordDictSize; i++) {
+            if ((int)strlen(wordDict[i]) == wordLen && strncmp(s + start, wordDict[i], wordLen) == 0) {
+               
+                int newPathLen = pathLen + wordLen + 2; 
+                char* nextPath = (char*)malloc(newPathLen * sizeof(char));
+                
+                if (pathLen == 0) {
+                    sprintf(nextPath, "%s ", wordDict[i]);
+                } else {
+                    sprintf(nextPath, "%s%s ", currentPath, wordDict[i]);
+                }
+                
+                backtrack(s, end, len, wordDict, wordDictSize, nextPath, strlen(nextPath), result, returnSize, memo);
+                free(nextPath);
+            }
+        }
+    }
+    
+    if (*returnSize == oldReturnSize) {
+        memo[start].count = -1;
+    }
+}
+
+char** wordBreak(char* s, char** wordDict, int wordDictSize, int* returnSize) {
+    int len = strlen(s);
+    *returnSize = 0;
+    char** result = NULL;
+    
+    MemoNode* memo = (MemoNode*)malloc((len + 1) * sizeof(MemoNode));
+    for (int i = 0; i <= len; i++) memo[i].count = 0;
+    
+    backtrack(s, 0, len, wordDict, wordDictSize, "", 0, &result, returnSize, memo);
+    
+    free(memo);
+    return result;
+}
