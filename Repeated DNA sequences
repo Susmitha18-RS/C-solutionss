@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+
+
+int charToBits(char c) {
+    switch (c) {
+        case 'A': return 0; // 00 in binary
+        case 'C': return 1; // 01 in binary
+        case 'G': return 2; // 10 in binary
+        case 'T': return 3; // 11 in binary
+    }
+    return 0;
+}
+
+char** findRepeatedDnaSequences(char* s, int* returnSize) {
+    int len = strlen(s);
+    *returnSize = 0;
+    
+    if (len < 10) {
+        return NULL;
+    }
+
+
+    bool* seenOnce = (bool*)calloc(MAX_HASH, sizeof(bool));
+    bool* seenTwice = (bool*)calloc(MAX_HASH, sizeof(bool));
+
+    char** result = NULL;
+    
+    int currentHash = 0;
+
+    int bitMask = 0xFFFFF; 
+
+    for (int i = 0; i < 9; i++) {
+        currentHash = (currentHash << 2) | charToBits(s[i]);
+    }
+
+    for (int i = 9; i < len; i++) {
+  
+        currentHash = ((currentHash << 2) | charToBits(s[i])) & bitMask;
+
+        if (seenOnce[currentHash]) {
+
+            if (!seenTwice[currentHash]) {
+                seenTwice[currentHash] = true;
+                
+                result = (char**)realloc(result, ((*returnSize) + 1) * sizeof(char*));
+                result[*returnSize] = (char*)malloc(11 * sizeof(char));
+       
+                strncpy(result[*returnSize], s + i - 9, 10);
+                result[*returnSize][10] = '\0'; 
+                (*returnSize)++;
+            }
+        } else {
+            seenOnce[currentHash] = true;
+        }
+    }
+
+
+    free(seenOnce);
+    free(seenTwice);
+
+    return result;
+}
