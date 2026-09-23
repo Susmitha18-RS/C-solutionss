@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdlib.h>
+
+bool wordBreak(char* s, char** wordDict, int wordDictSize) {
+    int n = strlen(s);
+    
+  
+    bool* dp = (bool*)calloc(n + 1, sizeof(bool));
+    dp[0] = true; // Base case: empty string
+
+    for (int i = 1; i <= n; i++) {
+        for (int j = 0; j < i; j++) {
+            // If the prefix s[0...j-1] is valid
+            if (dp[j]) {
+                int len = i - j;
+               
+                for (int k = 0; k < wordDictSize; k++) {
+                    if ((int)strlen(wordDict[k]) == len && strncmp(s + j, wordDict[k], len) == 0) {
+                        dp[i] = true;
+                        break; // Found a match for dp[i], no need to check other words
+                    }
+                }
+          
+                if (dp[i]) {
+                    break;
+                }
+            }
+        }
+    }
+
+    bool result = dp[n];
+    free(dp);
+    return result;
+}
