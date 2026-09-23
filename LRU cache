@@ -1,0 +1,107 @@
+
+#include <stdlib.h>
+
+
+typedef struct Node {
+    int key;
+    int val;
+    struct Node* prev;
+    struct Node* next;
+} Node;
+
+
+typedef struct {
+    int capacity;
+    int size;
+    Node* head;
+    Node* tail; 
+    Node* hashMap[10001]; 
+} LRUCache;
+
+void removeNode(Node* node) {
+    node->prev->next = node->next;
+    node->next->prev = node->prev;
+}
+
+void addToHead(LRUCache* obj, Node* node) {
+    node->next = obj->head->next;
+    node->prev = obj->head;
+    obj->head->next->prev = node;
+    obj->head->next = node;
+}
+
+
+LRUCache* lRUCacheCreate(int capacity) {
+    LRUCache* obj = (LRUCache*)malloc(sizeof(LRUCache));
+    obj->capacity = capacity;
+    obj->size = 0;
+
+    
+    obj->head = (Node*)malloc(sizeof(Node));
+    obj->tail = (Node*)malloc(sizeof(Node));
+    
+    obj->head->next = obj->tail;
+    obj->head->prev = NULL;
+    obj->tail->prev = obj->head;
+    obj->tail->next = NULL;
+
+    for (int i = 0; i <= 10000; i++) {
+        obj->hashMap[i] = NULL;
+    }
+
+    return obj;
+}
+
+int lRUCacheGet(LRUCache* obj, int key) {
+    if (obj->hashMap[key] == NULL) {
+        return -1;
+    }
+    
+    Node* node = obj->hashMap[key];
+
+    removeNode(node);
+    addToHead(obj, node);
+    
+    return node->val;
+}
+
+void lRUCachePut(LRUCache* obj, int key, int value) {
+    if (obj->hashMap[key] != NULL) {
+
+        Node* node = obj->hashMap[key];
+        node->val = value;
+        removeNode(node);
+        addToHead(obj, node);
+    } else {
+ 
+        Node* newNode = (Node*)malloc(sizeof(Node));
+        newNode->key = key;
+        newNode->val = value;
+        
+        obj->hashMap[key] = newNode;
+        addToHead(obj, newNode);
+        obj->size++;
+        
+  
+        if (obj->size > obj->capacity) {
+            Node* lruNode = obj->tail->prev; 
+            removeNode(lruNode);
+            
+            obj->hashMap[lruNode->key] = NULL; 
+            free(lruNode);
+            obj->size--;
+        }
+    }
+}
+
+
+void lRUCacheFree(LRUCache* obj) {
+    Node* curr = obj->head;
+    while (curr != NULL) {
+        Node* next = curr->next;
+        free(curr);
+        curr = next;
+    }
+    free(obj);
+}
+
