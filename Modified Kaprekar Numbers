@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+void kaprekarNumbers(int p, int q) {
+    bool found = false;
+
+    for (long long n = p; n <= q; n++) {
+    
+        long long temp = n;
+        int d = 0;
+        while (temp > 0) {
+            d++;
+            temp /= 10;
+        }
+
+     
+        long long square = n * n;
+
+        long long divisor = 1;
+        for (int i = 0; i < d; i++) {
+            divisor *= 10;
+        }
+
+   
+        long long r = square % divisor;
+        long long l = square / divisor;
+
+
+        if (l + r == n) {
+            printf("%lld ", n);
+            found = true;
+        }
+    }
+
+    if (!found) {
+        printf("INVALID RANGE");
+    }
+    printf("\n");
+}
+
+int main() {
+    int p, q;
+    if (scanf("%d", &p) != 1) return 1;
+    if (scanf("%d", &q) != 1) return 1;
+
+    kaprekarNumbers(p, q);
+
+    return 0;
+}
