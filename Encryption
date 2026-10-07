@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+
+char* encryption(char* s) {
+    int orig_len = strlen(s);
+    
+    char* clean_str = (char*)malloc((orig_len + 1) * sizeof(char));
+    int L = 0;
+    
+    for (int i = 0; i < orig_len; i++) {
+        if (s[i] != ' ' && s[i] != '\n' && s[i] != '\r') {
+            clean_str[L++] = s[i];
+        }
+    }
+    clean_str[L] = '\0';
+
+    double sqrt_L = sqrt(L);
+    int rows = (int)floor(sqrt_L);
+    int cols = (int)ceil(sqrt_L);
+
+
+    if (rows * cols < L) {
+        rows++;
+    }
+
+    char* result = (char*)malloc((L + cols + 1) * sizeof(char));
+    int res_idx = 0;
+
+    for (int c = 0; c < cols; c++) {
+        for (int r = 0; r < rows; r++) {
+            int str_idx = r * cols + c;
+            if (str_idx < L) {
+                result[res_idx++] = clean_str[str_idx];
+            }
+        }
+        if (c < cols - 1) {
+            result[res_idx++] = ' ';
+        }
+    }
+    result[res_idx] = '\0';
+
+
+    free(clean_str);
+
+    return result;
+}
+
+int main() {
+
+    char s[1005];
+    if (fgets(s, sizeof(s), stdin) == NULL) return 1;
+
+    char* result = encryption(s);
+    printf("%s\n", result);
+
+    free(result);
+    return 0;
+}
