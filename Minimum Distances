@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+
+
+
+int minimumDistances(int a_count, int* a) {
+
+
+    int last_seen[100001];
+
+    for (int i = 0; i <= 100000; i++) {
+        last_seen[i] = -1;
+    }
+    
+    int min_dist = 1e9; 
+
+    for (int i = 0; i < a_count; i++) {
+        int val = a[i];
+   
+        if (last_seen[val] != -1) {
+            int current_dist = i - last_seen[val];
+            min_dist = MIN(min_dist, current_dist);
+        }
+
+        last_seen[val] = i;
+    }
+
+
+    return (min_dist == 1e9) ? -1 : min_dist;
+}
+
+int main() {
+    int n;
+    if (scanf("%d", &n) != 1) return 1;
+
+    int* a = (int*)malloc(n * sizeof(int));
+    for (int i = 0; i < n; i++) {
+        if (scanf("%d", &a[i]) != 1) return 1;
+    }
+
+    int result = minimumDistances(n, a);
+    printf("%d\n", result);
+
+    free(a);
+    return 0;
+}
