@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+char* biggerIsGreater(char* w) {
+    int len = strlen(w);
+    
+
+    char* res = (char*)malloc((len + 1) * sizeof(char));
+    strcpy(res, w);
+
+
+    int i = len - 2;
+    while (i >= 0 && res[i] >= res[i + 1]) {
+        i--;
+    }
+
+
+    if (i < 0) {
+        free(res);
+        return "no answer";
+    }
+
+    int j = len - 1;
+    while (res[j] <= res[i]) {
+        j--;
+    }
+
+
+    char temp = res[i];
+    res[i] = res[j];
+    res[j] = temp;
+
+    int left = i + 1;
+    int right = len - 1;
+    while (left < right) {
+        temp = res[left];
+        res[left] = res[right];
+        res[right] = temp;
+        left++;
+        right--;
+    }
+
+    return res;
+}
+
+int main() {
+    int t;
+    if (scanf("%d", &t) != 1) return 1;
+
+    while (t--) {
+        char w[105]; 
+        if (scanf("%s", w) != 1) return 1;
+
+        char* result = biggerIsGreater(w);
+        printf("%s\n", result);
+
+        if (strcmp(result, "no answer") != 0) {
+            free(result);
+        }
+    }
+
+    return 0;
+}
