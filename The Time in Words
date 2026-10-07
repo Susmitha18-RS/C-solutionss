@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+char* timeInWords(int h, int m) {
+
+    const char* words[] = {
+        "", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+        "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", 
+        "eighteen", "nineteen", "twenty", "twenty one", "twenty two", "twenty three", 
+        "twenty four", "twenty five", "twenty six", "twenty seven", "twenty eight", "twenty nine"
+    };
+
+
+    char* result = (char*)malloc(100 * sizeof(char));
+
+    if (m == 0) {
+        sprintf(result, "%s o' clock", words[h]);
+    } 
+    else if (m == 15) {
+        sprintf(result, "quarter past %s", words[h]);
+    } 
+    else if (m == 30) {
+        sprintf(result, "half past %s", words[h]);
+    } 
+    else if (m == 45) {
+  
+        int next_h = (h == 12) ? 1 : h + 1;
+        sprintf(result, "quarter to %s", words[next_h]);
+    } 
+    else if (m < 30) {
+        const char* min_word = (m == 1) ? "minute" : "minutes";
+        sprintf(result, "%s %s past %s", words[m], min_word, words[h]);
+    } 
+    else {
+
+        int mins_to = 60 - m;
+        int next_h = (h == 12) ? 1 : h + 1;
+        const char* min_word = (mins_to == 1) ? "minute" : "minutes";
+        sprintf(result, "%s %s to %s", words[mins_to], min_word, words[next_h]);
+    }
+
+    return result;
+}
+
+int main() {
+    int h, m;
+    if (scanf("%d", &h) != 1) return 1;
+    if (scanf("%d", &m) != 1) return 1;
+
+    char* result = timeInWords(h, m);
+    printf("%s\n", result);
+
+    free(result);
+    return 0;
+}
