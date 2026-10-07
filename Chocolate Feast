@@ -1,0 +1,33 @@
+#include <stdio.h>
+
+
+int chocolateFeast(int n, int c, int m) {
+ 
+    int chocolates_eaten = n / c;
+    int wrappers = chocolates_eaten;
+
+
+    while (wrappers >= m) {
+        int new_chocolates = wrappers / m;
+        chocolates_eaten += new_chocolates;
+        
+        wrappers = (wrappers % m) + new_chocolates;
+    }
+
+    return chocolates_eaten;
+}
+
+int main() {
+    int t;
+    if (scanf("%d", &t) != 1) return 1;
+
+    while (t--) {
+        int n, c, m;
+        if (scanf("%d %d %d", &n, &c, &m) != 3) return 1;
+
+        int result = chocolateFeast(n, c, m);
+        printf("%d\n", result);
+    }
+
+    return 0;
+}
